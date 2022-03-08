@@ -16,7 +16,7 @@ function ListMember() {
             alert('Warning: React class is empty now')
         if(listJava.length === 0)
             alert('Warning: Java class is empty now')
-    }, [])
+    }, [listReact])
 
     let tranferMember = (e) => {
         if(e.class === "react"){
