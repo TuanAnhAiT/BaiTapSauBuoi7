@@ -1,11 +1,11 @@
 const divTag = document.getElementById("list-member");
 function ListMember() {
-    const [listReact, setListReact] = React.useState([
+    const [listReact, setListReact] = React.useState(JSON.parse(localStorage.getItem('listReact')) || [
         { name: "Đinh Tuấn Anh", age: 16, memberClass: "react" },
         { name: "Ngụy Minh Thắng", age: 20, memberClass: "react" },
         { name: "Nguyễn Anh Thư", age: 21, memberClass: "react" }
     ]);
-    const [listJava, setListjava] = React.useState([
+    const [listJava, setListjava] = React.useState(JSON.parse(localStorage.getItem('listJava')) || [
         { name: "Bế Trọng Hiếu", age: 19, memberClass: "java" },
         { name: "Ngô Huỳnh Đức", age: 20, memberClass: "java" },
         { name: "Nguyễn Mạnh Dũng", age: 21, memberClass: "java" }
@@ -16,13 +16,14 @@ function ListMember() {
         memberClass: "react"
     });
     const [editIndex, setEditIndex] = React.useState();
+    const [searchName, setSearchName] = React.useState("");
 
     React.useEffect(() => {
         if (listReact.length === 0)
             alert('Warning: React class is empty now')
         else if (listJava.length === 0)
             alert('Warning: Java class is empty now')
-    }, [listReact])
+    }, [listReact, listJava])
 
     const tranferMember = (e) => {
         if (e.memberClass === "react") {
@@ -30,12 +31,16 @@ function ListMember() {
             const new_arr = listReact.filter(item => item.memberClass !== "java");
             setListReact(new_arr);
             setListjava([...listJava, e]);
+            localStorage.setItem('listReact', JSON.stringify(new_arr));
+            localStorage.setItem('listJava', JSON.stringify([...listJava, e]));
         }
         else {
             e.memberClass = "react";
             const new_arr = listJava.filter(item => item.memberClass !== "react");
             setListjava(new_arr);
             setListReact([...listReact, e]);
+            localStorage.setItem('listReact', JSON.stringify([...listReact, e]));
+            localStorage.setItem('listJava', JSON.stringify(new_arr));
         }
     }
     const setName = (e) => {
@@ -50,9 +55,11 @@ function ListMember() {
     const addNewMember = () => {
         if (dataMember.memberClass === "react") {
             setListReact([...listReact, dataMember]);
+            localStorage.setItem('listReact', JSON.stringify([...listReact, dataMember]));
         }
         else {
-            setListjava([...listJava, dataMember])
+            setListjava([...listJava, dataMember]);
+            localStorage.setItem('listJava', JSON.stringify([...listJava, dataMember]));
         }
         setDataMember({
             name: "",
@@ -77,11 +84,51 @@ function ListMember() {
             listJava[editIndex] = dataMember;
             setListjava([...listJava]);
         }
+        localStorage.setItem('listReact', JSON.stringify(listReact));
+        localStorage.setItem('listJava', JSON.stringify(listJava));
         setDataMember({
             name: "",
             age: "",
             memberClass: "react"
         })
+    }
+    const sortMember = () => {
+        setListReact([...listReact.sort((a, b) => {
+            if (parseInt(a.age) > parseInt(b.age))
+                return 1;
+            if (parseInt(a.age) < parseInt(b.age))
+                return -1;
+            return 0;
+        })]);
+        setListjava([...listJava.sort((a, b) => {
+            if (parseInt(a.age) > parseInt(b.age))
+                return 1;
+            if (parseInt(a.age) < parseInt(b.age))
+                return -1;
+            return 0;
+        })]);
+    }
+    const setSearchNameMember = (e) => {
+        setSearchName(e.target.value);
+    }
+    const searchMember = () => {
+        if(searchName !== ""){
+            const searchListReact = listReact.filter((e) => {
+                return e.name.toLowerCase().includes(searchName);
+            })
+            localStorage.setItem('searchListReact', JSON.stringify(searchListReact));
+            setListReact(JSON.parse(localStorage.getItem('searchListReact')));
+
+            const searchListJava = listJava.filter((e) => {
+                return e.name.toLowerCase().includes(searchName);
+            })
+            localStorage.setItem('searchListJava', JSON.stringify(searchListJava));
+            setListjava(JSON.parse(localStorage.getItem('searchListJava')));
+        }
+        else{
+            setListReact(JSON.parse(localStorage.getItem('listReact')));
+            setListjava(JSON.parse(localStorage.getItem('listJava')));
+        }
     }
 
     return (
@@ -114,9 +161,9 @@ function ListMember() {
             </div>
             <div className="form-add-member">
                 <h2 className="title">Form add member</h2>
-                <lable>name</lable>
+                <label htmlFor="name">name</label>
                 <input onChange={setName} name="name" value={dataMember.name} type="text"></input>
-                <lable>age</lable>
+                <label htmlFor="age">age</label>
                 <input onChange={setAge} name="age" value={dataMember.age} type="text"></input>
                 <select value={dataMember.memberClass} onChange={setClass} name="class">
                     <option value="react">react</option>
@@ -125,6 +172,11 @@ function ListMember() {
                 <br />
                 <button onClick={addNewMember}>add member</button>
                 <button onClick={editMember}>edit member</button>
+                <br />
+                <label htmlFor="search">search by name</label>
+                <input onChange={setSearchNameMember} name="search" value={searchName} type="text"></input>
+                <button onClick={searchMember}>search</button>
+                <button onClick={sortMember}>sort</button>
             </div>
         </div>
     )
