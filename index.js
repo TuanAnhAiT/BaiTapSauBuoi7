@@ -18,12 +18,17 @@ function ListMember() {
     const [editIndex, setEditIndex] = React.useState();
     const [searchName, setSearchName] = React.useState("");
 
+    const inputRef = React.useRef();
+
     React.useEffect(() => {
         if (listReact.length === 0)
             alert('Warning: React class is empty now')
         else if (listJava.length === 0)
             alert('Warning: Java class is empty now')
     }, [listReact, listJava])
+    React.useEffect(() => {
+        console.log("render");
+    })
 
     const tranferMember = (e) => {
         if (e.memberClass === "react") {
@@ -74,6 +79,7 @@ function ListMember() {
             memberClass: e.memberClass
         })
         setEditIndex(i);
+        inputRef.current.focus();
     }
     const editMember = () => {
         if (dataMember.memberClass === "react") {
@@ -112,7 +118,7 @@ function ListMember() {
         setSearchName(e.target.value);
     }
     const searchMember = () => {
-        if(searchName !== ""){
+        if (searchName !== "") {
             const searchListReact = listReact.filter((e) => {
                 return e.name.toLowerCase().includes(searchName);
             })
@@ -125,9 +131,21 @@ function ListMember() {
             localStorage.setItem('searchListJava', JSON.stringify(searchListJava));
             setListjava(JSON.parse(localStorage.getItem('searchListJava')));
         }
-        else{
+        else {
             setListReact(JSON.parse(localStorage.getItem('listReact')));
             setListjava(JSON.parse(localStorage.getItem('listJava')));
+        }
+    }
+    const deleteMember = (e, i) => {
+        if(e.memberClass === "react"){
+            listReact.splice(i, 1)
+            setListReact([...listReact]);
+            localStorage.setItem('listReact', JSON.stringify(listReact));
+        }
+        else{
+            listJava.splice(i, 1)
+            setListjava([...listJava]);
+            localStorage.setItem('listJava', JSON.stringify(listJava));
         }
     }
 
@@ -141,6 +159,7 @@ function ListMember() {
                             <div key={value.name}>name: {value.name} - age: {value.age}
                                 <button onClick={() => tranferMember(value)}>tranfer</button>
                                 <button onClick={() => handleEditClick(value, index)}>edit</button>
+                                <button onClick={() => deleteMember(value, index)}>delete</button>
                             </div>
                         )
                     }) : "empty class"
@@ -154,6 +173,7 @@ function ListMember() {
                             <div key={value.name}>name: {value.name} - age: {value.age}
                                 <button onClick={() => tranferMember(value)}>tranfer</button>
                                 <button onClick={() => handleEditClick(value, index)}>edit</button>
+                                <button onClick={() => deleteMember(value, index)}>delete</button>
                             </div>
                         )
                     }) : "empty class"
@@ -162,7 +182,7 @@ function ListMember() {
             <div className="form-add-member">
                 <h2 className="title">Form add member</h2>
                 <label htmlFor="name">name</label>
-                <input onChange={setName} name="name" value={dataMember.name} type="text"></input>
+                <input onChange={setName} name="name" ref={inputRef} value={dataMember.name} type="text"></input>
                 <label htmlFor="age">age</label>
                 <input onChange={setAge} name="age" value={dataMember.age} type="text"></input>
                 <select value={dataMember.memberClass} onChange={setClass} name="class">
